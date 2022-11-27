@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import include
+from substances import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
+    path(r'doses/', views.DoseRecordView.as_view()),
+    path(r'dose/<int:pk>/', views.DoseRecordView.as_view()),
+    path(r'dose/', views.DoseRecordView.as_view())
 ]

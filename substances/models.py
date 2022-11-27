@@ -39,7 +39,7 @@ class Dose(models.Model):
         abstract = True
 
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
-    dosage = models.FloatField()
+    dosage = models.DecimalField(decimal_places=2, max_digits=10)
     dosage_unit = models.CharField(max_length=2, choices=DOSAGE_UNITS, default="mg")
 
     def __str__(self):
@@ -61,7 +61,7 @@ class Pharmacokinetics(RouteOfIngestionMixin, models.Model):
         verbose_name_plural = "Pharmacokinetics"
         unique_together = ('ROI', 'substance')
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
-    bioavailability = models.FloatField()
+    bioavailability = models.DecimalField(decimal_places=2, max_digits=10)
     tOnset = models.DurationField()
     tMax = models.DurationField()
     tHalf = models.DurationField()
