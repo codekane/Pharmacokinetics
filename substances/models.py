@@ -5,7 +5,7 @@ from django.db import models
 class RouteOfIngestion(models.Model):
     ROUTES = [
         ("Oral", "Oral"), ("Insufflated", "Insufflated"), ("Vaporized", "Vaporized"),
-        ("Rectal", "Rectal"), ("Intravenous", "Intravenous")
+        ("Sublingual", "Sublingual"), ("Rectal", "Rectal"), ("Intravenous", "Intravenous")
     ]
     class Meta:
         abstract=True
@@ -18,13 +18,19 @@ class RouteOfIngestionMixin(RouteOfIngestion):
 class Substance(models.Model):
     name = models.CharField(max_length=30)
 
+    def __str__(self):
+        return "{0}".format(self.name)
 
-class DosageForm(RouteOfIngestionMixin, models.Model):
+
+class DosageForm(models.Model):
     class Meta:
         db_table = "dosage_forms"
         verbose_name_plural = "Dosage Forms"
+    name = models.CharField(max_length=30)
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return "{0} - {1}".format(self.substance.name, self.name)
 
 # What's this for... Is it a base model?
 class Dose(models.Model):
@@ -35,6 +41,9 @@ class Dose(models.Model):
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
     dosage = models.FloatField()
     dosage_unit = models.CharField(max_length=2, choices=DOSAGE_UNITS, default="mg")
+
+    def __str__(self):
+        return "{0} {1} {2}".format(self.dosage, self.dosage_unit, self.substance.name)
 
 # This is for splitting an XR into two IR doses with different offsets.
 class DosageFormDose(Dose):
@@ -48,6 +57,9 @@ class DosageFormDose(Dose):
     dosage_form = models.ForeignKey(DosageForm, on_delete=models.CASCADE)
 
 class Pharmacokinetics(RouteOfIngestionMixin, models.Model):
+    class Meta:
+        verbose_name_plural = "Pharmacokinetics"
+        unique_together = ('ROI', 'substance')
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
     bioavailability = models.FloatField()
     tOnset = models.DurationField()
@@ -60,6 +72,9 @@ class DoseRecord(RouteOfIngestionMixin, Dose):
         verbose_name_plural = "Dose Records"
     timestamp = models.DateTimeField()
     dosage_form = models.ForeignKey(DosageForm, on_delete=models.CASCADE, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1} {2}{3}".format(self.timestamp, self.substance.name, self.dosage, self.dosage_unit )
 
 
 
