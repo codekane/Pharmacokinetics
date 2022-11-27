@@ -15,6 +15,7 @@ class RouteOfIngestionMixin(RouteOfIngestion):
     class Meta:
         abstract=True
 
+
 class Substance(models.Model):
     name = models.CharField(max_length=30)
 

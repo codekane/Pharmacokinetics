@@ -23,5 +23,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path(r'doses/', views.DoseRecordView.as_view()),
     path(r'dose/<int:pk>/', views.DoseRecordView.as_view()),
-    path(r'dose/', views.DoseRecordView.as_view())
+    path(r'dose/', views.DoseRecordView.as_view()),
+    path(r'substance/<int:pk>/formulations/', views.SubstanceFormulationsView.as_view()),
+    path(r'substance/<int:pk>/pharmacokinetics/', views.SubstancePharmacokineticsView.as_view())
 ]

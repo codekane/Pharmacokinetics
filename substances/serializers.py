@@ -23,3 +23,11 @@ class DoseRecordSerializer(serializers.Serializer):
 
         instance.save()
         return instance
+
+class PharmacokineticsSerializer(serializers.Serializer):
+    substance_id = serializers.IntegerField()
+    ROI = serializers.ChoiceField(choices=RouteOfIngestion.ROUTES)
+    bioavailability = serializers.DecimalField(decimal_places=2, max_digits=10)
+    tOnset = serializers.DurationField()
+    tMax = serializers.DurationField()
+    tHalf = serializers.DurationField()

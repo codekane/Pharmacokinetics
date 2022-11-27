@@ -4,8 +4,28 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from substances.models import DoseRecord
-from substances.serializers import DoseRecordSerializer
+from substances.models import DoseRecord, Substance, Pharmacokinetics
+from substances.serializers import DoseRecordSerializer, PharmacokineticsSerializer
+
+
+
+class SubstanceFormulationsView(APIView):
+    # http_methood_names = ['get']
+    pass
+
+class SubstancePharmacokineticsView(APIView):
+    http_method_names = ['get']
+
+    def get(self, request, pk):
+        substance = get_object_or_404(Substance.objects.all(), pk=pk)
+        kinetics = Pharmacokinetics.objects.filter(substance_id=pk)
+        serializer = PharmacokineticsSerializer(kinetics, many=True)
+        return Response({
+            "pharmacokinetics": serializer.data})
+
+
+
+
 
 class DoseRecordView(APIView):
     http_method_names  = ['get', 'post', 'put', 'delete']
