@@ -4,27 +4,77 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from substances.models import DoseRecord, Substance, Pharmacokinetics
-from substances.serializers import DoseRecordSerializer, PharmacokineticsSerializer
+from substances.models import DoseRecord, DosageForm, DosageFormDose, Substance, Pharmacokinetics
+from substances.serializers import DoseRecordSerializer, DosageFormSerializer, DosageFormDoseSerializer,\
+    PharmacokineticsSerializer, SubstanceSerializer
+from django.db.models import Prefetch
 
 
+class SubstancesDetailView(APIView):
+    http_method_name = ['get']
+
+    def get(self, request):
+        dosage_form_queryset = DosageForm.objects.prefetch_related('dosageformdose_set')
+        substances_queryset = Substance.objects.prefetch_related('pharmacokinetics_set').prefetch_related(Prefetch('dosageform_set', queryset=dosage_form_queryset))
+        output = []
+        for substance in substances_queryset:
+            substance_data = SubstanceSerializer(substance).data
+
+            pharmacokinetics_data  = PharmacokineticsSerializer(substance.pharmacokinetics_set.all(), many=True).data
+            substance_data['pharmacokinetics'] = pharmacokinetics_data
+
+
+            dosage_formset = substance.dosageform_set.all()
+            substance_dosage_forms = []
+            for dosage_form in dosage_formset:
+                doses = []
+                dosage_form_data = DosageFormSerializer(dosage_form).data
+
+                doses_set = dosage_form.dosageformdose_set.all()
+
+                for dose in doses_set:
+                    dose_data = DosageFormDoseSerializer(dose).data
+                    doses.append(dose_data)
+                dosage_form_data['doses'] = doses
+                substance_dosage_forms.append(dosage_form_data)
+            substance_data['dosage_forms'] = substance_dosage_forms
+            output.append(substance_data)
+        return Response(output)
+
+
+
+class SubstancesView(APIView):
+    http_method_name = ['get']
+
+    def get(self, request):
+        substances = Substance.objects.all()
+        serializer = SubstanceSerializer(substances, many=True)
+        return Response(serializer.data)
+
+class DosageFormDosesView(APIView):
+    http_method_names = ['get']
+
+    def get(self, request, pk):
+        doses = DosageFormDose.objects.filter(dosage_form_id=pk)
+        serializer = DosageFormDoseSerializer(doses, many=True)
+        return Response(serializer.data)
 
 class SubstanceFormulationsView(APIView):
-    # http_methood_names = ['get']
-    pass
+    http_method_names = ['get']
+
+    def get(self, request, pk):
+        dosage_forms = DosageForm.objects.filter(substance_id=pk)
+        serializer = DosageFormSerializer(dosage_forms, many=True)
+        return Response(serializer.data)
+
 
 class SubstancePharmacokineticsView(APIView):
     http_method_names = ['get']
 
     def get(self, request, pk):
-        substance = get_object_or_404(Substance.objects.all(), pk=pk)
         kinetics = Pharmacokinetics.objects.filter(substance_id=pk)
         serializer = PharmacokineticsSerializer(kinetics, many=True)
-        return Response({
-            "pharmacokinetics": serializer.data})
-
-
-
+        return Response(serializer.data)
 
 
 class DoseRecordView(APIView):

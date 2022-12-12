@@ -25,5 +25,8 @@ urlpatterns = [
     path(r'dose/<int:pk>/', views.DoseRecordView.as_view()),
     path(r'dose/', views.DoseRecordView.as_view()),
     path(r'substance/<int:pk>/formulations/', views.SubstanceFormulationsView.as_view()),
-    path(r'substance/<int:pk>/pharmacokinetics/', views.SubstancePharmacokineticsView.as_view())
+    path(r'substance/<int:pk>/pharmacokinetics/', views.SubstancePharmacokineticsView.as_view()),
+    path(r'dosage_form/<int:pk>/doses', views.DosageFormDosesView.as_view()),
+    path(r'substances/', views.SubstancesView.as_view()),
+    path(r'substances/full/', views.SubstancesDetailView.as_view()),
 ]

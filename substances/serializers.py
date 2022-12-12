@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
-from substances.models import Dose, DoseRecord, RouteOfIngestion
+from substances.models import Dose, DosageForm, DoseRecord, RouteOfIngestion, DosageFormDose, Substance
 
 class DoseRecordSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     timestamp = serializers.DateTimeField()
     substance_id = serializers.IntegerField()
     ROI = serializers.ChoiceField(choices=RouteOfIngestion.ROUTES)
@@ -31,3 +32,21 @@ class PharmacokineticsSerializer(serializers.Serializer):
     tOnset = serializers.DurationField()
     tMax = serializers.DurationField()
     tHalf = serializers.DurationField()
+
+class DosageFormDoseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DosageFormDose
+        fields = ['dosage', 'dosage_unit', 'tOffset']
+
+class DosageFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DosageForm
+        fields = ['id', 'name', 'substance_id', 'dosage_form_dose_set']
+    # name = serializers.CharField()
+    # substance_id = serializers.IntegerField()
+    dosage_form_dose_set = DosageFormDoseSerializer(many=True, read_only=True)
+
+class SubstanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Substance
+        fields = ['id', 'name']
