@@ -92,18 +92,19 @@ class DoseRecordView(APIView):
         pass
 
     def post(self, request):
-        dose_record = request.data.get('dose_record')
+        dose_record = request.data
 
         serializer = DoseRecordSerializer(data=dose_record)
         if serializer.is_valid(raise_exception=True):
             saved_dose_record = serializer.save()
-        return Response({"success": "Dose Record {0} created successfully".format(pk)})
+        return Response({"success": "Dose Record {0} created successfully".format(saved_dose_record.id)})
 
     def put(self, request, pk):
         dose_record = get_object_or_404(DoseRecord.objects.all(), pk=pk)
         data = request.data.get('dose_record')
         serializer = DoseRecordSerializer(instance=dose_record, data=data, partial=True)
 
+        breakpoint()
         if serializer.is_valid(raise_exception=True):
             saved_dose_record = serializer.save()
         return Response({"success": "Dose Record {0} updated successfully!".format(pk)})

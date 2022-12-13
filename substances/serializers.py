@@ -3,7 +3,10 @@ from rest_framework import serializers
 from substances.models import Dose, DosageForm, DoseRecord, RouteOfIngestion, DosageFormDose, Substance
 
 class DoseRecordSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    # class Meta:
+    #     model = DoseRecord
+    #     fields = ['id', 'timestamp', 'substance_id', 'ROI', 'dosage_form_id', 'dosage', 'dosage_unit']
+    id = serializers.IntegerField(required=False, allow_null=True)
     timestamp = serializers.DateTimeField()
     substance_id = serializers.IntegerField()
     ROI = serializers.ChoiceField(choices=RouteOfIngestion.ROUTES)
@@ -11,8 +14,8 @@ class DoseRecordSerializer(serializers.Serializer):
     dosage = serializers.DecimalField(decimal_places=2, max_digits=10)
     dosage_unit = serializers.ChoiceField(choices=Dose.DOSAGE_UNITS)
 
-    def create(self, instance, validated_data):
-        return DoseRecord.objects.create(**vallidated_data)
+    def create(self, validated_data):
+        return DoseRecord.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.timestamp = validated_data.get('timestamp', instance.timestamp)
