@@ -18,6 +18,9 @@ class RouteOfIngestionMixin(RouteOfIngestion):
 
 class Substance(models.Model):
     name = models.CharField(max_length=30)
+    volume_of_distribution = models.CharField(max_length=30, blank=True, null=True) # L/KG
+    elimination_rate_constant = models.CharField(max_length=30, blank=True, null=True) # /1h
+    half_life = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True) # Hours
 
     def __str__(self):
         return "{0}".format(self.name)
@@ -55,17 +58,22 @@ class DosageFormDose(Dose):
     DOSAGE_UNITS = [('%', '%'), ('mg', 'mg')]
     dosage_unit = models.CharField(max_length=2, choices=DOSAGE_UNITS, default="%")
     tOffset = models.DurationField(blank=True, null=True)
+    tLag = models.DecimalField(decimal_places=2, max_digits=10)
     dosage_form = models.ForeignKey(DosageForm, on_delete=models.CASCADE)
 
 class Pharmacokinetics(RouteOfIngestionMixin, models.Model):
+    KINETICS = [('Instantaneous', 'Instantaneous'), ('Zero Order', 'Zero Order'), ('First Order', 'First Order')]
     class Meta:
         verbose_name_plural = "Pharmacokinetics"
         unique_together = ('ROI', 'substance')
     substance = models.ForeignKey(Substance, on_delete=models.CASCADE)
     bioavailability = models.DecimalField(decimal_places=2, max_digits=10)
+    tLag = models.DecimalField(decimal_places=2, max_digits=10)
     tOnset = models.DurationField()
     tMax = models.DurationField()
     tHalf = models.DurationField()
+    absorption_rate_constant = models.CharField(max_length=30, null=True, blank=True) # /1h
+    absorption_kinetics = models.CharField(max_length=30, choices=KINETICS, null=True, blank=True)
 
 class DoseRecord(RouteOfIngestionMixin, Dose):
     class Meta:

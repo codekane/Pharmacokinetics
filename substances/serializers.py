@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from substances.models import Dose, DosageForm, DoseRecord, RouteOfIngestion, DosageFormDose, Substance
+from substances.models import Dose, DosageForm, DoseRecord, RouteOfIngestion, DosageFormDose, Substance, Pharmacokinetics
 
 class DoseRecordSerializer(serializers.Serializer):
     # class Meta:
@@ -28,18 +28,23 @@ class DoseRecordSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-class PharmacokineticsSerializer(serializers.Serializer):
-    substance_id = serializers.IntegerField()
-    ROI = serializers.ChoiceField(choices=RouteOfIngestion.ROUTES)
-    bioavailability = serializers.DecimalField(decimal_places=2, max_digits=10)
-    tOnset = serializers.DurationField()
-    tMax = serializers.DurationField()
-    tHalf = serializers.DurationField()
+class PharmacokineticsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Pharmacokinetics
+        fields = ['id', 'substance_id', 'ROI', 'bioavailability', 'tLag', 'tMax', 'tHalf', 'absorption_rate_constant', 'absorption_kinetics']
+    ##substance_id = serializers.IntegerField()
+    ##ROI = serializers.ChoiceField(choices=RouteOfIngestion.ROUTES)
+    ##bioavailability = serializers.DecimalField(decimal_places=2, max_digits=10)
+    ##tOnset = serializers.DurationField()
+    ##tMax = serializers.DurationField()
+    ##tHalf = serializers.DurationField()
+    ##absorption_rate_constant = serializers.CharField(max_length=30)
+    ##absorption_kinetics = serializers.CharField
 
 class DosageFormDoseSerializer(serializers.ModelSerializer):
     class Meta:
         model = DosageFormDose
-        fields = ['dosage', 'dosage_unit', 'tOffset']
+        fields = ['dosage', 'dosage_unit', 'tLag']
 
 class DosageFormSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,4 +57,4 @@ class DosageFormSerializer(serializers.ModelSerializer):
 class SubstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Substance
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'volume_of_distribution', 'elimination_rate_constant', 'half_life']
